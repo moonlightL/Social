@@ -351,6 +351,23 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0!important
 }
 
+.social-main .post-reward .post-reward-area {
+    display: flex;
+    justify-content: center;
+    animation: slowDown 1s;
+}
+
+.social-main .post-reward .post-reward-area.hide {
+    display: none;
+}
+
+/** 分类 **/
+.social-main .category img {
+    width: 324px;
+    height: 220px;
+    object-fit: cover;
+}
+
 /** 专辑 **/
 .social-main .album-detail img {
     width: 100%;
@@ -404,53 +421,6 @@ h1, h2, h3, h4, h5, h6 {
 .hb-w-body .hb-w-body-item .avatar img,
 .hb-r-body .hb-r-body-item .avatar img {
     border-radius: 50% !important;
-}
-
-/** 目录 **/
-.social-main .stick-toc {
-    position: static;
-    margin-top: 1rem;
-    padding-bottom: 1rem;
-    display: none;
-}
-
-.social-main .stick-toc.affix {
-    position: fixed !important;
-    top: 64px;
-    margin-top: 0;
-    width: 276px;
-}
-
-.social-main .stick-toc .post-toc {
-    height: 480px;
-    overflow: auto;
-}
-
-.social-main .stick-toc .post-toc::-webkit-scrollbar {
-    width: 8px;
-    height: 0;
-    background: #ccc;
-    border-radius: 10px
-}
-
-.social-main .stick-toc .post-toc::-webkit-scrollbar-thumb {
-    display: block;
-    width: 8px;
-    margin: 0 auto;
-    border-radius: 10px;
-    background: #aaa
-}
-
-.social-main .stick-toc .nav-item {
-    width: 100%;
-}
-
-.social-main .stick-toc .nav-item .nav-child {
-    padding-left: 1rem;
-}
-
-.social-main .stick-toc .nav-item li {
-    list-style-type: none;
 }
 
 /** 消息框 **/
@@ -532,4 +502,29 @@ div.note.note-danger:not(.no-icon)::before {
     left: 1rem;
     width: 32px;
     height: 32px;
+}
+
+/** 复制按钮 **/
+.highlight .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    display: inline-block;
+    text-align: center;
+    width: 44px;
+    height: 22px;
+    padding: 2px;
+    color: #e1e1e1;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px !important;
+    opacity: 0;
+}
+
+.highlight:hover .copy-btn {
+    opacity: 1;
+}
+
+.highlight .copy-btn:hover {
+    color: #FFF !important;
 }

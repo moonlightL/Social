@@ -14,14 +14,8 @@
             share: {
                 js: baseLink + "/source/js/overshare/js/social-share.min.js"
             },
-            aos: {
-                js: baseLink + "/source/js/aos/aos.min.js"
-            },
-            toc: {
-                js: baseLink + "/source/js/toc.js"
-            },
-            affix: {
-                js: baseLink + "/source/js/affix.js"
+            stickToc: {
+                js: baseLink + "/source/js/jquery.affixtoc.js"
             },
             hideseek: {
                 js: baseLink + "/source/js/jquery.hideseek.min.js"
@@ -55,7 +49,7 @@
     };
 
     const loadLazy = function() {
-        $("img.lazy-load").lazyload({
+        $("img.lazyload").lazyload({
             placeholder : baseLink + "/source/images/loading.gif",
             effect: "fadeIn"
         });
@@ -102,17 +96,6 @@
         });
     };
 
-    const aosEvent = function() {
-        $.getScript(APP.plugins.aos.js, function() {
-            AOS.init({
-                offset: 200,
-                duration: 600,
-                easing: 'ease-in-sine',
-                delay: 100,
-            });
-        });
-    };
-
     const archiveEvent = function() {
         let archiveBody = $("#archive-body");
         let loadText = $("#load-text");
@@ -148,10 +131,10 @@
                                     htmlArr.push('<li>');
                                     htmlArr.push('<div class="rounded d-sm-flex border-0 mb-1 p-3 position-relative">');
                                     htmlArr.push('<div class="avatar text-center">');
-                                    htmlArr.push('<img class="avatar-img rounded-circle lazy-load" data-original="'+obj.coverUrl+'" alt="" src="'+obj.coverUrl+'" style="display: inline;">');
+                                    htmlArr.push('<img class="avatar-img rounded-circle lazyload" data-original="'+obj.coverUrl+'" alt="" src="'+obj.coverUrl+'" style="display: inline;">');
                                     htmlArr.push('</div>');
                                     htmlArr.push('<div class="mx-sm-3 my-2 my-sm-0">');
-                                    htmlArr.push('<p class="small mb-2">');
+                                    htmlArr.push('<p class="mb-2">');
                                     htmlArr.push('<a data-pjax href="/'+obj.link+'">'+obj.title+'</a>');
                                     htmlArr.push('</p>');
                                     htmlArr.push('<a class="btn btn-sm btn-outline-light py-1 me-2" data-pjax="" href="/categories/'+obj.categoryName+'/">'+obj.categoryName+'</a>');
@@ -179,10 +162,10 @@
                                     htmlArr.push('<li>');
                                     htmlArr.push('<div class="rounded d-sm-flex border-0 mb-1 p-3 position-relative">');
                                     htmlArr.push('<div class="avatar text-center">');
-                                    htmlArr.push('<img class="avatar-img rounded-circle lazy-load" data-original="'+obj.coverUrl+'" alt="" src="'+obj.coverUrl+'" style="display: inline;">');
+                                    htmlArr.push('<img class="avatar-img rounded-circle lazyload" data-original="'+obj.coverUrl+'" alt="" src="'+obj.coverUrl+'" style="display: inline;">');
                                     htmlArr.push('</div>');
                                     htmlArr.push('<div class="mx-sm-3 my-2 my-sm-0">');
-                                    htmlArr.push('<p class="small mb-2">');
+                                    htmlArr.push('<p class="mb-2">');
                                     htmlArr.push('<a data-pjax href="/'+obj.link+'">'+obj.title+'</a>');
                                     htmlArr.push('</p>');
                                     htmlArr.push('<a class="btn btn-sm btn-outline-light py-1 me-2" data-pjax="" href="/categories/'+obj.categoryName+'/">'+obj.categoryName+'</a>');
@@ -243,19 +226,13 @@
     };
 
     const postEvent = function() {
-        let $detail = $("#post-content");
-        if ($detail.length > 0) {
+        let $content = $("#post-content");
+        if ($content.length > 0) {
 
             $("#tocBox").show();
 
-            $.getScript(APP.plugins.affix.js, function () {
-                let $sidebar = $(".stick-toc");
-                $sidebar.affix({ offset: 600});
-            });
-
-            $.getScript(APP.plugins.toc.js, function () {
-                $(".post-toc").html(tocHelper("#post-content"));
-                $('body').scrollspy({ offset: 300, target: '.stick-toc' });
+            $.getScript(APP.plugins.stickToc.js, function () {
+                $(".post-toc").affixToc({affixEle: ".affix-toc", scopeEle: "#post-content"});
             });
 
             $.getScript(APP.plugins.highlight.js, function () {
@@ -264,34 +241,90 @@
                 });
             });
 
-            let praiseBtn = $("#post-praise-btn");
-            let postId = praiseBtn.data("id");
-            let key = "post-praise-" + postId;
-            let flag = localStorage.getItem(key);
-            if (flag) {
-                praiseBtn.html("<i class='fa fa-thumbs-up'></i> 已点赞")
-            }
-
-            praiseBtn.off("click").on("click", function() {
-                if (flag) {
-                    return;
-                }
-
-                $.ajax({
-                    "type": "POST",
-                    "url": "/praisePost/" + postId,
-                    "success": function(resp) {
-                        if (resp.success) {
-                            localStorage.setItem(key, "y");
-                            praiseBtn.html("<i class='fa fa-thumbs-up'></i> 已点赞")
-                        }
-                    }
-                })
-            });
+            postPraiseEvent();
+            shareCodeEvent();
+            runCodeEvent();
+            copyCodeEvent();
+            rewardEvent();
 
         } else {
             $("#tocBox").hide();
         }
+    };
+
+    const shareCodeEvent = function() {
+        $.getScript(APP.plugins.share.js);
+    };
+
+    const runCodeEvent = function() {
+        $(".run-code").on("click", function() {
+            let $btn = $(this);
+            let html = $btn.prev("figure").find("td.code pre").html();
+            html = html.replace(/<br>/g, "\r\n");
+            let codeContent = $(html).text();
+            let childWin = window.open("", "_blank", "");
+            childWin.document.open("text/html", "replace");
+            childWin.opener = null;
+            childWin.document.write(codeContent);
+            childWin.document.close()
+        });
+    };
+
+    const copyCodeEvent = function() {
+        let $highlightArr = $(".highlight");
+        $highlightArr.each(function(index, domEle) {
+            let $highlight = $(domEle);
+            let $table = $highlight.find("table");
+            let copyBtn = $("<span class='copy-btn'>复制</span>");
+            $highlight.append(copyBtn);
+            let clipboard = new ClipboardJS(copyBtn.get(0), {
+                text: function(trigger) {
+                    let html = $table.find("td.code pre").html();
+                    html = html.replace(/<br>/g, "\r\n");
+                    return $(html).text();
+                }
+            });
+
+            clipboard.on('success', function(e) {
+                layer.msg("复制成功");
+                e.clearSelection();
+            });
+        });
+    };
+
+    const postPraiseEvent = function() {
+        let praiseBtn = $("#post-praise-btn");
+        let postId = praiseBtn.data("id");
+        let praiseNum = praiseBtn.data("praise");
+        let key = "post-praise-" + postId;
+        let flag = localStorage.getItem(key);
+        if (flag) {
+            praiseBtn.html("<i class='fa fa-thumbs-up'></i> 已点赞(" + praiseNum + ")")
+        }
+
+        praiseBtn.off("click").on("click", function() {
+            if (flag) {
+                return;
+            }
+
+            $.ajax({
+                "type": "POST",
+                "url": "/praisePost/" + postId,
+                "success": function(resp) {
+                    if (resp.success) {
+                        localStorage.setItem(key, "y");
+                        praiseBtn.data("praise", resp.data);
+                        praiseBtn.html("<i class='fa fa-thumbs-up'></i> 已点赞(" + resp.data + ")")
+                    }
+                }
+            })
+        });
+    };
+
+    const rewardEvent = function() {
+        $("#reward-btn").off("click").on("click", function() {
+            $(".post-reward-area").toggleClass("hide");
+        });
     };
 
     const pjaxEvent = function() {
@@ -309,7 +342,6 @@
             let $target = $navBar.find("a").filter("[href='" + window.location.pathname + "']");
             $target.addClass("active");
             loadLazy();
-            aosEvent();
         });
     };
 
@@ -317,10 +349,7 @@
         toTopEvent();
         modeEvent();
         searchEvent();
-
         loadLazy();
-        aosEvent();
-
         archiveEvent();
         dynamicEvent();
         postEvent();
